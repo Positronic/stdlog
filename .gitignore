@@ -1,0 +1,8 @@
+.*.sw*
+.dub/
+.project
+.buildpath
+.settings/
+*~
+lib/*
+dub.selections.json
