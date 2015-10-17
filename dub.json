@@ -1,0 +1,10 @@
+{
+	"name" : "stdlog",
+	"description" : "Full-featured high-performance logging framework",
+	"authors" : ["Doug Nickerson"],
+	"targetType": "library",
+	"targetPath": "lib",
+	"targetName": "libLog",
+	"dependencies" : {
+	}
+}
