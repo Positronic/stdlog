@@ -39,14 +39,15 @@ import std.exception;
  *  "items" (see below), because they define the "thing" that is being converted or
  *  type of conversion.
  *
- * Conversion Pattern String:
+ * Conversion_Pattern_String:
  *  Conversion patterns are (UTF-8) strings of characters interspersed with 
  *  conversion pattern items.  Conversion pattern items start with a '%' in the printf-like
  *  syntax, but are decorated not only by the usual format flags, width, precision,
- *  conversion specifier character, and conversion word, but also 3 other optional
- *  parts: format arguments (in square brackets [] ), a sub-pattern (in parenthesis () )
- *  or conversion parameters (in curly brackets {} ).
- * 1. Format arguments [] are needed when either the width or precision format modifiers,
+ *  conversion specifier character, and conversion word, but also 3 other optional parts :
+ *     format arguments (in square brackets [] ),
+ *     a sub-pattern (in parenthesis () ), or
+ *     conversion parameters (in curly brackets {} ).
+ * Format_arguments: [] are needed when either the width or precision format modifiers,
  *  or both are indicated by an asterisk '*'.  Just like in printf implementations,
  *  this allows the width and/or precision formatting to be controlled by a variable and
  *  can enable some unique dynamic logging capabilities (data itself controls formatting
@@ -54,7 +55,7 @@ import std.exception;
  *  Format arguments must contain 1 or 2 comma-separated integer-typed variables which
  *  must evaluate or be convertible to an integer at the time of the log event.  Their
  *  values will be treated as std.format.formattedWrite does. 
- * 2. A sub-pattern () contains a conversion pattern string which is first evaluated to
+ * A_sub_pattern: () contains a conversion pattern string which is first evaluated to
  *  an output string and operated on as if it were a single input value (of string
  *  type).  See the 'replace(){}' conversion word (function) for example.  Sub-patterns
  *  allow grouping of multiple values which can then be formatted as a whole (aligned,
@@ -62,13 +63,13 @@ import std.exception;
  *  case, the sub-pattern enclosed in parenthesis need not be preceded by a conversion
  *  word, but must have some format specifier between the '%' and '('.  In fact, this is
  *  the only case where the conversion word is not required.
- * 3. Conversion parameters {} come last, after the conversion word and sub-pattern ()
+ * Conversion_parameters: {} come last, after the conversion word and sub-pattern ()
  *  if any.  Certain conversion words require 1 or more (sometimes optional) parameters.
  *  For instance, %mdc{key} takes 1 parameter, the key to lookup user-defined values.
  *  The %replace(p){'find','rep'} always takes 2 parameters, the first is a RegEx to find
  *  and the second is the replacement. Note, it also requires a sub-pattern, p, inside the
  *  parenthesis over which to do the replacement.
- * Lastly, be aware that an empty conversion parameters list "{}" can be used on ANY
+ * Lastly: be aware that an empty conversion parameters list "{}" can be used on ANY
  *  conversion pattern item to terminate it.  This might be needed in ambiguous cases,
  *  to denote where a conversion pattern item ends and literal characters start.
  *  For example, "%date%nHello" would cause the parser to try to find a conversion
@@ -87,8 +88,14 @@ import std.exception;
  *      $(I OtherCharacterExceptPercent)
  *  FormatSpec:
  *      $(I Position) $(I Flags) $(I MinWidth) $(I MaxWidth) $(I Precision) $(I FormatChar)? $(I FormatArgs)
+ *  MinWidth:
+ *      $(I Width)  // from std.format
+ *  MaxWidth:
+ *      empty
+ *      $(B '..') $(I Integer)
+ *      $(B '..*')
  *  ConversionWord:
- *      'm' | 'msg' | 'pid' | 'threadId' | 'mdc' | 'date' | 'replace' | 'env'
+ *      'm' | 'msg' | 'pid' | 'threadId' | 'mdc' | 'date' | 'replace' | 'env' | ...TODO
  *  SubPattern:
  *      empty
  *      '(' $(I ConversionPattern) ')'
@@ -178,11 +185,11 @@ package static enum WordType : ubyte
 
     // Shouldn't be needed: see conversionpattern_data "WD[WT.Array...." for explanation
     //ArrayFormat             = 0x38,   /// %( ... %) -- indicates std.format's array (grouping) syntax
-    SubPatternOnly          = 0x39,   /// %-20.30(subpat) -- only case where NO conversion word is needed, but format must exist
+    SubPatternOnly          = 0x39,   /// %-20..30(subpat) -- only case where NO conversion word is needed, but format must exist
     Date                    = 0x3E,
     Timestamp               = 0x3F,
     
-    // Source-level values (0x40 to 0x7F)
+    // Source-level values (0x40 to 0x6F)
     SourceFileName          = 0x41,
     SourceFilePath          = 0x42,
     SourceLineNumber        = 0x43,
@@ -199,60 +206,66 @@ package static enum WordType : ubyte
     ModuleFQN               = 0x54,
     
     CompileTimestamp        = 0x60,
-    CompilerName            = 0x7E,
-    CompilerVersion         = 0x7F,
+    CompilerName            = 0x6E,
+    CompilerVersion         = 0x6F,
     
-    // Runtime-level values (0x80 to 0xAF)
-    HostName                = 0x80,
-    ShortHostName           = 0x81,
-    HostIPAddress           = 0x82,
-    CPUStuff                = 0x83,
-    ExecutableName          = 0x88,
-    ExecutablePath          = 0x89,
-    CommandLineArg          = 0x8A,
-    CommandLineFull         = 0x8B,
-    WorkingDirectory        = 0x8F,
-    ProcessID               = 0x90,
-    ProcessName             = 0x91,
-    EnvVariable             = 0x9F,  /// env
-    ThreadID                = 0xA0,
-    ThreadName              = 0xA1,
-    MDC                     = 0xA2,
+    // Runtime-level values (0x70 to 0x9F)
+    HostName                = 0x70,
+    ShortHostName           = 0x71,
+    HostIPAddress           = 0x72,
+    CPUStuff                = 0x73,
+    ExecutableName          = 0x78,
+    ExecutablePath          = 0x79,
+    CommandLineArg          = 0x7A,
+    CommandLineFull         = 0x7B,
+    WorkingDirectory        = 0x7F,
     
-    // Exception / Error values (0xB0 to 0xDF)
-    ExceptionTypeName       = 0xB0,
-    ExceptionFullTypeName   = 0xB1,
-    ExceptionMessage        = 0xB2,
-    ExceptionFile           = 0xB3,
-    ExceptionLine           = 0xB4,
+    ProcessID               = 0x80,
+    ProcessName             = 0x81,
+    EnvVariable             = 0x8F,  /// env
     
-    ErrorTypeName           = 0xC0,  // Note: AssertErrors are Errors
-    ErrorFullTypeName       = 0xC1,
-    ErrorMessage            = 0xC2,
-    ErrorFile               = 0xC3,
-    ErrorLine               = 0xC4,
+    ThreadID                = 0x90,
+    ThreadName              = 0x91,
+    MDC                     = 0x92,
     
-    TraceInfo               = 0xD0,
+    // Exception / Error values (0xA0 to 0xCF)
+    ExceptionTypeName       = 0xA0,
+    ExceptionFullTypeName   = 0xA1,
+    ExceptionMessage        = 0xA2,
+    ExceptionFile           = 0xA3,
+    ExceptionLine           = 0xA4,
     
-    // String conversion functions (0xE0 to 0xEF)
-    Replace                 = 0xE0,   /// RegEx find and replace in sub-pattern
-    Crop                    = 0xE1,   /// RegEx match, then crop anything not matching
-    Strip                   = 0xE2,   /// Strip away any leading or trailing whitespace
-    ToLower                 = 0xE3,   /// all lowercase version of sub-pattern
-    ToUpper                 = 0xE4,   /// all uppercase version of sub-pattern
-    Capitalize              = 0xE5,   /// Captialize first letter of each word and lowercase all other letters
-    Center                  = 0xE6,   /// Center the sub-pattern within a given field width
-    Fill                    = 0xE7,   /// Fill leading and trailing whitespace with a given character 
-    Wrap                    = 0xE8,   /// Wrap long text to a fixed-width multiline "paragraph"
-    ToBase64                = 0xE9,   /// Create a Base64 encoded string from binary data / raw bytes
-    EncodeURI               = 0xEA,   /// Take any UTF-8 string and escape any URI-invalid characters
-    DecodeURI               = 0xEB,   /// Take any URI possibly with escaped characters and return the unescaped UTF-8
-    Round                   = 0xEC,   /// Round numeric value to certain decimal place (accepts numeric format specifiers)
-    ToJSON                  = 0xED,   /// Output a JSON-formatted version of any D-type
-    ToUUID                  = 0xEE,   /// Generate a UUID for a sub-pattern
-    HTML                    = 0xEF,   /// Wraps the sub-pattern in a given HTML tag
+    ErrorTypeName           = 0xB0,  // Note: AssertErrors are Errors
+    ErrorFullTypeName       = 0xB1,
+    ErrorMessage            = 0xB2,
+    ErrorFile               = 0xB3,
+    ErrorLine               = 0xB4,
+    
+    TraceInfo               = 0xC0,
+    
+    // String conversion functions (0xD0 to 0xDF)
+    Replace                 = 0xD0,   /// RegEx find and replace in sub-pattern
+    Crop                    = 0xD1,   /// RegEx match, then crop anything not matching
+    Strip                   = 0xD2,   /// Strip away any leading or trailing whitespace
+    ToLower                 = 0xD3,   /// all lowercase version of sub-pattern
+    ToUpper                 = 0xD4,   /// all uppercase version of sub-pattern
+    Capitalize              = 0xD5,   /// Captialize first letter of each word and lowercase all other letters
+    Center                  = 0xD6,   /// Center the sub-pattern within a given field width
+    Fill                    = 0xD7,   /// Fill leading and trailing whitespace with a given character 
+    Wrap                    = 0xD8,   /// Wrap long text to a fixed-width multiline "paragraph"
+    
+    Round                   = 0xDC,   /// Round numeric value to certain decimal place (accepts numeric format specifiers)
+    
+
+    // Encoding conversion functions (0xE0 to 0xEF)
+    ToUUID                  = 0xE0,   /// Generate a UUID for a sub-pattern
+    ToJSON                  = 0xE1,   /// Output a JSON-formatted version of any D-type
+    ToBase64                = 0xE2,   /// Create a Base64 encoded string from binary data / raw bytes
+    EncodeURI               = 0xE3,   /// Take UTF-8 string and escape any URI-invalid characters
+    DecodeURI               = 0xE4,   /// Take URI possibly with escaped characters and return the unescaped UTF-8
+    HTML                    = 0xE5,   /// Wraps the sub-pattern in a given HTML tag
                                       /// example: "%html(subpat){td}" produces "<td>subpat<\td>"
-        
+    
     // Colors (0xF0 to 0xFD)
     Black                   = 0xF0,   /// Colors are formatted like %black(sub-pattern)
     Red                     = 0xF1,   ///  but can also be made bold with the option: %red(sub-pattern){bold}
@@ -304,7 +317,18 @@ class PatternParseException : Exception
     }
 }
 
-private alias enforcePat = enforce!PatternParseException;
+private alias enforcePat = std.exception.enforce!(PatternParseException, bool);
+
+import std.format;
+import std.traits;
+import std.range.primitives;
+import std.algorithm;
+
+template ConvPatternItem(Char)
+    if (!is(Unqual!Char == Char))
+{
+    alias ConvPatternItem = ConvPatternItem!(Unqual!Char);
+}
 
 /**
  * The common 'unit' of a conversion pattern string: a single conversion item.
@@ -335,27 +359,54 @@ struct ConvPatternItem(Char)
     ConversionPattern!Char subPattern;
     //ConvParameters params;  implement with a Variant[] or maybe have specialized ConvPatternItems for CWs that take parameters
     const(Char)[] params;   // for now
+    
+    this(const(Char)[] strLiteral)
+    {
+        wordType = WordType.LiteralString;
+        literal = strLiteral;
+    }
+    
+    /// Given the next or "following" conversion pattern item in
+    /// a sequence, merge or "coalesce" it with this one if they are both
+    /// string literals.  Return true is coalescence occured.
+    bool coalesce(ConvPatternItem!Char followingItem)
+    {
+        if(wordType == WordType.LiteralString &&
+            followingItem.wordType == WordType.LiteralString)
+        {
+            literal ~= followingItem.literal;
+            return true;
+        }
+        return false;
+    }
+}
+
+template ConversionPattern(Char)
+    if (!is(Unqual!Char == Char))
+{
+    alias ConversionPattern = ConversionPattern!(Unqual!Char);
 }
 
 /**
- * A General handler for $(D printf) style format specifiers augmented with conversion 'words'
- *  sub-patterns, and optional parameters -- the "conversion pattern" (a.k.a. "layout" in some
- *  logging frameworks). At parse-time, used for building an array of ConvPatternItems
- *  which comprise the entire pattern.  Construction proceeds like std.format.FormatSpec
- *  (much code shamelessly copied) by incrementally parsing off items from the front until
- *  the "trailing" string is empty.
+ * A General handler and container for $(D printf) style format specifiers augmented with
+ *  conversion 'words', sub-patterns, and optional parameters -- the "conversion pattern"
+ *  (a.k.a. "layout" in some logging frameworks). At parse-time, used for building an array
+ *  of ConvPatternItems which comprise the entire pattern.  Construction proceeds like
+ *  std.format.FormatSpec (much code shamelessly copied) by incrementally parsing off items
+ *  from the front until the "trailing" string is empty.
  *
  * During logging, the conversion pattern is used to build the actual log entry output.
  *  This is done incrementally, so a given instance of a ConversionPattern can hold the
- *  original pattern as the user provided in config, any intermediate partially-rendered
- *  state, or the final, completely rendered log output (a single item containing a literal). 
+ *  original pattern as the user provided in config, any intermediate partially rendered
+ *  state, or the final completely rendered log output (a single item containing a literal). 
  */
 struct ConversionPattern(Char)
     if (is(Unqual!Char == Char))
 {
+    alias ConvPatternItem!Char ItemType;
     // the items or "words" that each contain their own formatting,
     // sub-patterns, parameters, literal string value, etc.
-    ConvPatternItem[] items;
+    ItemType[] items;
     
     /**
        $(D _trailing) contains the rest of the conversion pattern string.
@@ -371,71 +422,89 @@ struct ConversionPattern(Char)
         trailing = pattern;
     }
     
-    bool writeUpToNextSpec(OutputRange)(OutputRange writer)
+    void parse()
+    {
+        while(parseUpToNextSpec()) continue;
+        coalesce();
+    }
+    
+    bool parseUpToNextSpec()
     {
         if (trailing.empty)
             return false;
         for (size_t i = 0; i < trailing.length; ++i)
         {
             if (trailing[i] != '%') continue;
-            put(writer, trailing[0 .. i]);
+            items ~= ItemType(trailing[0 .. i]);
             trailing = trailing[i .. $];
             enforcePat(trailing.length >= 2, `Unterminated pattern specifier: "%"`);
             trailing = trailing[1 .. $];
-
             if (trailing[0] != '%')
             {
-                // Spec found. Fill up the spec, and bailout
+                // Spec found. Make 1 new ConvPatternItem and bailout
                 fillUp();
                 return true;
             }
-            // Doubled! Reset and Keep going
+            // Doubled! ("%%") Reset and Keep going
             i = 0;
         }
         // no conversion pattern item spec found
-        put(writer, trailing);
+        items ~= ItemType(trailing);
         trailing = null;
         return false;
     }
-    
+
     // shameless duplication of code from std.format.FormatSpec and
-    //  trivial modification was cheap, but may prove useful as some
-    //  functional logic may change over time.
+    //  modification, but may prove useful as some functional logic
+    //  may change over time.
     // Also, due to the similarity of this struct and FormatSpec,
     //  specific tests for bugs discovered in FormatSpec in the past
     //  would be wise to regression test here
     unittest
     {
-        import std.array;
-        auto w = appender!(char[])();
-        auto f = ConversionPattern("abc%ndef%nghi");
-        f.writeUpToNextSpec(w);
-        assert(w.data == "abc", w.data);
+        import std.algorithm : map, joiner;
+        import std.conv : text;
+        auto f = ConversionPattern!Char("abc%ndef%nghi");
+        f.parseUpToNextSpec();
+        assert(f.items[0].literal == "abc", text(f.items[0].literal));
+        assert(f.items[1].literal == "\n", text(f.items[1].literal));
         assert(f.trailing == "def%nghi", text(f.trailing));
-        f.writeUpToNextSpec(w);
-        assert(w.data == "abcdef", w.data);
+        f.parseUpToNextSpec();
+        assert(f.items[2].literal == "def", text(f.items[2].literal));
+        assert(f.items[3].literal == "\n", text(f.items[3].literal));
         assert(f.trailing == "ghi");
         // test with embedded %%s
-        f = ConversionPattern("ab%%cd%%ef%ng%%h%nij");
-        w.clear();
-        f.writeUpToNextSpec(w);
-        assert(w.data == "ab%cd%ef" && f.trailing == "g%%h%nij", w.data);
-        f.writeUpToNextSpec(w);
-        assert(w.data == "ab%cd%efg%h" && f.trailing == "ij");
+        f = ConversionPattern!Char("ab%%cd%%ef%ng%%h%nij");
+        f.parseUpToNextSpec();
+        assert(f.items[0].literal == "ab" &&
+               f.items[1].literal == "%cd" &&
+               f.items[2].literal == "%ef" &&
+               f.items[3].literal == "\n" &&
+               f.trailing == "g%%h%nij",
+               text(f.items[0..4].map!(a => a.literal).joiner));
+        assert(f.parseUpToNextSpec(), "parse failed to return true");
+        assert(!f.parseUpToNextSpec(), "parse should have read the last 'ij' of trailing");
+        assert(f.trailing == null);
+        // testing coalesce / parse
+        f.coalesce();
+        assert(f.items.length == 1, "coalesce failed");
+        assert(f.items[0].literal == "ab%cd%ef\ng%h\nij", text(f.items[0].literal));
         // bug4775
-        f = ConversionPattern("%%%n");
-        w.clear();
-        f.writeUpToNextSpec(w);
-        assert(w.data == "%" && f.trailing == "");
-        f = ConversionPattern("%%%%%n%%");
-        w.clear();
-        while (f.writeUpToNextSpec(w)) continue;
-        assert(w.data == "%%%");
+        f = ConversionPattern!Char("%%%n");
+        f.parseUpToNextSpec();
+        assert(f.items[0].literal == "" &&
+               f.items[1].literal == "%" &&
+               f.items[2].literal == "\n" &&
+               f.trailing == "");
+        f = ConversionPattern!Char("%%%%%n%%");
+        while (f.parseUpToNextSpec()) continue;
+        f.coalesce();
+        assert(f.items[0].literal == "%%\n%");
 
-        f = ConversionPattern("a%%b%%c%");
-        w.clear();
-        assertThrown!FormatException(f.writeUpToNextSpec(w));
-        assert(w.data == "a%b%c" && f.trailing == "%");
+        f = ConversionPattern!Char("a%%b%%c%");
+        assertThrown!PatternParseException(f.parseUpToNextSpec());
+        f.coalesce();
+        assert(f.items[0].literal == "a%b%c" && f.trailing == "%");
     }
     
     private void fillUp()
@@ -444,6 +513,11 @@ struct ConversionPattern(Char)
         //  domain-specific language as defined above (for ConvPatternItem)
         // Assume that trailing is on the character immediately after the '%'
         //   '%%' case is already taken care of
+        if(trailing[0] == 'n') {
+            items ~= ItemType("\n");
+            trailing = trailing[1 .. $];
+            return;
+        }
         
         // Check for "%(" or "%-(" cases, which are std.format's array (grouping)
         //  syntax - let singleSpec handle it? -- but still need to look-ahead
@@ -508,7 +582,42 @@ struct ConversionPattern(Char)
         // check "stopping" logic for a '(' immediately following a conversion word
         //   which doesn't use a sub-pattern, or similar cases, if any
     }
-}  
+    
+    /// Iteratively combine any adjacent string literal items
+    /// and then compress the array
+    private void coalesce()
+    {
+        size_t numCoalesced = 0;  // track how many items were merged
+        for(int i = 0, p = 1; p < items.length; i = p, p++)
+        {
+            // "suck up" any adjacent string literals into 1 item
+            while(p < items.length && items[i].coalesce(items[p]))
+            {
+                numCoalesced++;
+                items[p].wordType = WordType.Null;  // mark the item for deletion below
+                p++;
+            }
+        }
+        if(numCoalesced)   // don't do second pass if not necessary
+        {
+            // if this is a performance concern, consider items[] as a linked list or other
+            //  in-place mechanism.  For now, just reallocate a new array and copy non-Null items.
+            //ConvPatternItem!Char[] newItems = new ConvPatternItem!Char[items.length - numCoalesced];
+            //items.filter!(a => a.wordType != WordType.Null).copy(newItems);
+            //items = newItems;
+            // Does this work?
+            items.filter!(a => a.wordType != WordType.Null).copy(items);
+            items.length -= numCoalesced;
+        }
+    }
+    
+    unittest { /* see unittest for parseUpToNextSpec() */  }
+}
+
+void tmpFunc()
+{
+    auto cp = ConversionPattern!char("testing");
+}
 
 /**
 Helper function that returns a $(D ConvPatternItem) for a single

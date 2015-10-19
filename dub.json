@@ -6,5 +6,34 @@
 	"targetPath": "lib",
 	"targetName": "libLog",
 	"dependencies" : {
-	}
+	},
+	"configurations" : [
+	    {
+	        "name": "library",
+	        "targetType": "library"
+	    },
+	    {
+	        "name": "unittests",
+	        "targetType": "executable",
+	        "targetPath": "bin",
+	        "targetName": "libLog_unittests",
+	        "mainSourceFile": "test/main_unittests.d" 
+	    },
+	    {
+	        "name": "perftests",
+	        "targetType": "executable",
+	        "targetPath": "bin",
+	        "targetName": "libLog_perftests",
+	        "mainSourceFile": "test/main_perftests.d",
+	        "debugVersions": ["logPerf1"]
+	    },
+	    {
+	        "name": "userdocs",
+	        "targetType": "executable",
+	        "targetPath": "bin",
+	        "targetName": "libLog_genDocs",
+	        "mainSourceFile": "test/main_userdocs.d",
+	        "versions": ["Logging_UserDocs"]
+	    }
+	]
 }

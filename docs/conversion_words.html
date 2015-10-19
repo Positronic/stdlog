@@ -1,0 +1,298 @@
+<style>
+table {
+  border-color:gray;
+  border-spacing:2px;
+  font-family: Verdana, Arial, SunSans-Regular, Sans-Serif;
+  font-size: 11pt;
+  color: #000;
+}
+table td {
+  background-color: #f0f0f0;
+  padding: 3px;
+  border-top: 1px dotted #888888;
+}
+table tr:nth-child(odd) td {
+  background-color: #f9f9f9;
+}
+table.convWordTable th {
+  background-color: #888;
+  font-weight: bold;
+  min-width: 300px
+}
+td.word {
+  text-align: right;
+  vertical-align: text-top;
+}
+span.wordSubPat {
+ 
+}
+span.wordParam {
+  font-style: italic;
+}
+span.wordType {
+  font-style: italic;
+  font-weight: bold;
+}
+pre {
+  display: inline;
+  font-family: Courier, Monaco, Monospace;
+  font-size: 10pt;
+  padding-left: 1ex;
+  padding-right: 1ex;
+  line-height: 3ex;
+}
+pre.logInput {
+  
+}
+pre.logOutput {
+  border: 1px dashed #AAAAAA;
+  background: #D0D0D0;
+}
+</style>
+<table class="convWordTable">
+  <tr>
+    <th>Conversion Word</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>m</b><br>
+      <b>msg</b><br>
+      <b>message</b><br>
+    </td>
+    <td><span class="wordType">LogMessage</span>: THE log message content (m, msg)
+      <br>Example:   <pre class="logInput">%m</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>n</b><br>
+      <b>endl</b><br>
+    </td>
+    <td><span class="wordType">NewLine</span>: Equivalent to '\n' - inserts a newline character
+      <br>Example:   <pre class="logInput">%n</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>p</b><br>
+      <b>le</b><br>
+      <b>level</b><br>
+      <b>sev</b><br>
+    </td>
+    <td><span class="wordType">LogLevel</span>: Level or 'priority' or 'severity' of the logging event
+      <br>Example:   <pre class="logInput">%p</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>len</b><br>
+      <b>length</b><br>
+    </td>
+    <td><span class="wordType">LogLength</span>: Number of bytes of this log message
+      <br>Example:   <pre class="logInput">%len</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>configName</b><br>
+    </td>
+    <td><span class="wordType">LogConfigFileName</span>: Filename of the currently loaded log config, if any
+      <br>Example:   <pre class="logInput">%configName</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>configPath</b><br>
+    </td>
+    <td><span class="wordType">LogConfigFilePath</span>: Full path and filename of the currently loaded log config, if any
+      <br>Example:   <pre class="logInput">%configPath</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>d</b><br>
+      <b>date</b><br>
+      <b>d</b><span class="wordParam">{dateTimeFormat}</span><br>
+      <b>d</b><span class="wordSubPat">(sub-pat)</span><br>
+    </td>
+    <td><span class="wordType">Date</span>: Timestamp of the log event, supporting a multitude of formats.
+The format is specified in either a special sub-pattern following the strftime library function (time.h) format notation OR in the parameter dataTimeFormat which, like Logback, uses a more readable format notation similar to java.text.SimpleDateFormat.
+Either a sub-pattern or a conversion parameter or neither must be present; it is an error if both are.
+      <br>Example:   <pre class="logInput">%d</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>f</b><br>
+      <b>fileName</b><br>
+    </td>
+    <td><span class="wordType">SourceFileName</span>: Filename of the source file where the log entry originated. D keyword __FILE__
+      <br>Example:   <pre class="logInput">%f</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>L</b><br>
+      <b>line</b><br>
+    </td>
+    <td><span class="wordType">SourceLineNumber</span>: Line number within the source file where the log entry originated. D keyword __LINE__
+      <br>Example:   <pre class="logInput">%L</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>FN</b><br>
+      <b>funcFQN</b><br>
+      <b>method</b><br>
+    </td>
+    <td><span class="wordType">FunctionFQN</span>: Fully qualified name of the function where the log entry originated. D keyword __FUNCTION__
+      <br>Example:   <pre class="logInput">%FN</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>FNSig</b><br>
+      <b>fnPretty</b><br>
+      <b>prettyFunc</b><br>
+    </td>
+    <td><span class="wordType">FunctionPrettySig</span>: Pretty-printed function signature of the function where the log entry originated. D keyword __PRETTY_FUNCTION__
+      <br>Example:   <pre class="logInput">%FNSig</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+</table>
+<br>Same information but sorted alphabetically on the first conversion word:<br>
+<table class="convWordTable">
+  <tr>
+    <th>Conversion Word</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>configName</b><br>
+    </td>
+    <td><span class="wordType">LogConfigFileName</span>: Filename of the currently loaded log config, if any
+      <br>Example:   <pre class="logInput">%configName</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>configPath</b><br>
+    </td>
+    <td><span class="wordType">LogConfigFilePath</span>: Full path and filename of the currently loaded log config, if any
+      <br>Example:   <pre class="logInput">%configPath</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>d</b><br>
+      <b>date</b><br>
+      <b>d</b><span class="wordParam">{dateTimeFormat}</span><br>
+      <b>d</b><span class="wordSubPat">(sub-pat)</span><br>
+    </td>
+    <td><span class="wordType">Date</span>: Timestamp of the log event, supporting a multitude of formats.
+The format is specified in either a special sub-pattern following the strftime library function (time.h) format notation OR in the parameter dataTimeFormat which, like Logback, uses a more readable format notation similar to java.text.SimpleDateFormat.
+Either a sub-pattern or a conversion parameter or neither must be present; it is an error if both are.
+      <br>Example:   <pre class="logInput">%d</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>f</b><br>
+      <b>fileName</b><br>
+    </td>
+    <td><span class="wordType">SourceFileName</span>: Filename of the source file where the log entry originated. D keyword __FILE__
+      <br>Example:   <pre class="logInput">%f</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>FN</b><br>
+      <b>funcFQN</b><br>
+      <b>method</b><br>
+    </td>
+    <td><span class="wordType">FunctionFQN</span>: Fully qualified name of the function where the log entry originated. D keyword __FUNCTION__
+      <br>Example:   <pre class="logInput">%FN</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>FNSig</b><br>
+      <b>fnPretty</b><br>
+      <b>prettyFunc</b><br>
+    </td>
+    <td><span class="wordType">FunctionPrettySig</span>: Pretty-printed function signature of the function where the log entry originated. D keyword __PRETTY_FUNCTION__
+      <br>Example:   <pre class="logInput">%FNSig</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>L</b><br>
+      <b>line</b><br>
+    </td>
+    <td><span class="wordType">SourceLineNumber</span>: Line number within the source file where the log entry originated. D keyword __LINE__
+      <br>Example:   <pre class="logInput">%L</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>len</b><br>
+      <b>length</b><br>
+    </td>
+    <td><span class="wordType">LogLength</span>: Number of bytes of this log message
+      <br>Example:   <pre class="logInput">%len</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>m</b><br>
+      <b>msg</b><br>
+      <b>message</b><br>
+    </td>
+    <td><span class="wordType">LogMessage</span>: THE log message content (m, msg)
+      <br>Example:   <pre class="logInput">%m</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>n</b><br>
+      <b>endl</b><br>
+    </td>
+    <td><span class="wordType">NewLine</span>: Equivalent to '\n' - inserts a newline character
+      <br>Example:   <pre class="logInput">%n</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+  <tr>
+    <td class="word">
+      <b>p</b><br>
+      <b>le</b><br>
+      <b>level</b><br>
+      <b>sev</b><br>
+    </td>
+    <td><span class="wordType">LogLevel</span>: Level or 'priority' or 'severity' of the logging event
+      <br>Example:   <pre class="logInput">%p</pre>
+      <br>Generates: <pre class="logOutput">result of example</pre>
+    </td>
+  </tr>
+</table>
