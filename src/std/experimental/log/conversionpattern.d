@@ -354,7 +354,7 @@ struct ConvPatternItem(Char)
     alias FormatSpec!Char.DYNAMIC DYNAMIC;
     
     const(Char)[] fmtArgs;  // for now, but should implement as a concrete value/enum for quick lookup of the int(s) during logging
-    auto wordType = WordType.Null;
+    auto wordType = WordType.Undetermined;
     const(Char)[] literal;
     ConversionPattern!Char subPattern;
     //ConvParameters params;  implement with a Variant[] or maybe have specialized ConvPatternItems for CWs that take parameters
@@ -364,6 +364,7 @@ struct ConvPatternItem(Char)
     {
         wordType = WordType.LiteralString;
         literal = strLiteral;
+        fmtSpec = FormatSpec!Char("%s");
     }
     
     /// Given the next or "following" conversion pattern item in
@@ -378,6 +379,23 @@ struct ConvPatternItem(Char)
             return true;
         }
         return false;
+    }
+    
+    string toString()
+    {
+        return std.conv.text("address = ", cast(void*) &this,
+                "\nminWidth, maxWidth = ", fmtSpec.width,',',maxWidth,
+                "\nprecision = ", fmtSpec.precision,
+                "\nspec = ", fmtSpec.spec,
+                "\nindexStart, indexEnd = ", fmtSpec.indexStart,',',fmtSpec.indexEnd,
+                "\nflags(-,0, ,+,#) = ", fmtSpec.flDash,',',fmtSpec.flZero,',',fmtSpec.flSpace,',',fmtSpec.flPlus,',',fmtSpec.flHash,
+                "\nnested = ", fmtSpec.nested,
+                "\ntrailing = ", fmtSpec.trailing,
+                "\nfmtArgs = ", fmtArgs,
+                "\nwordType = ", wordType,
+                "\nliteral = ", literal,
+                "\nsubPattern = ", subPattern,
+                "\nparams = ", params, '\n');
     }
 }
 
@@ -438,13 +456,15 @@ struct ConversionPattern(Char)
             items ~= ItemType(trailing[0 .. i]);
             trailing = trailing[i .. $];
             enforcePat(trailing.length >= 2, `Unterminated pattern specifier: "%"`);
-            trailing = trailing[1 .. $];
-            if (trailing[0] != '%')
+            // ConversionPattern differs from FormatSpec in that it doesn't trim the 
+            //  '%' off before calling "fillUp()"
+            if (trailing[1] != '%')
             {
                 // Spec found. Make 1 new ConvPatternItem and bailout
                 fillUp();
                 return true;
             }
+            trailing = trailing[1 .. $];
             // Doubled! ("%%") Reset and Keep going
             i = 0;
         }
@@ -511,13 +531,28 @@ struct ConversionPattern(Char)
     {
         // Now the real 'meat' of the parser implementation for the
         //  domain-specific language as defined above (for ConvPatternItem)
-        // Assume that trailing is on the character immediately after the '%'
+        // Assume that trailing is on the initial '%' character
         //   '%%' case is already taken care of
-        if(trailing[0] == 'n') {
+        if(trailing[1] == 'n') {
             items ~= ItemType("\n");
-            trailing = trailing[1 .. $];
+            trailing = trailing[2 .. $];
             return;
         }
+        
+        // Needed for "ignoring" the output of FormatSpec
+        static struct DummyOutputRange {
+            void put(C)(C[] buf) {} // eat elements
+        }
+        auto a = DummyOutputRange();
+        
+        // Although the max width syntax '..' is not in FormatSpec, the fillUp() method of
+        //  FormatSpec currently steps over anything after the '.' that is not either a 
+        //  digit, '*' or '-' and only sets precision=0 and loops, therefore we can 
+        //  call fillUp on FormatSpec.
+        items ~= ConvPatternItem!Char();
+        items[$-1].fmtSpec = FormatSpec!Char(trailing);
+        items[$-1].fmtSpec.writeUpToNextSpec(a);
+        std.stdio.writeln(items[$-1]);
         
         // Check for "%(" or "%-(" cases, which are std.format's array (grouping)
         //  syntax - let singleSpec handle it? -- but still need to look-ahead
@@ -612,6 +647,8 @@ struct ConversionPattern(Char)
     }
     
     unittest { /* see unittest for parseUpToNextSpec() */  }
+    
+    
 }
 
 void tmpFunc()

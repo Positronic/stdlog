@@ -16,4 +16,8 @@ void main()
         writeln("No unit tests were built or executed!");
         writeln("This entry point is meant to be used only when unittests are built (dub -c unittests -b unittest)");
     }
+    
+    import std.experimental.log.conversionpattern;
+    auto cp = ConversionPattern!char("test%sasdfasd");
+    cp.parseUpToNextSpec();
 }
